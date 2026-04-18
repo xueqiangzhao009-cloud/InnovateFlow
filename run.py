@@ -5,19 +5,19 @@ import asyncio
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
 
-from src.core.state import AgentState, checkpointer
-from src.core.routing import route_after_planner, route_after_coder
-from src.agents.Planner import planner_node
-from src.agents.Coder import coder_node
-from src.agents.Sandbox import sandbox_node
-from src.agents.Reviewer import reviewer_node
-from src.tools.file_tools import tools, read_file, list_directory, planner_tools
-from src.core.logger import setup_logger
-from src.core.metrics import metrics
-from src.core.recovery import create_workspace_snapshot
+from app.core.state import AgentState, checkpointer
+from app.core.routing import route_after_planner, route_after_executor
+from app.agents.Planner import planner_node
+from app.agents.Executor import executor_node
+from app.agents.Sandbox import sandbox_node
+from app.agents.Reviewer import reviewer_node
+from app.tools.file_tools import tools, read_file, list_directory, planner_tools
+from app.core.logger import setup_logger
+from app.core.metrics import metrics
+from app.core.recovery import create_workspace_snapshot
 
 # 初始化日志系统
-logger = setup_logger("CodeCraftAI.run")
+logger = setup_logger("InnovateFlow.run")
 
 # ==========================================
 # 1. 初始化图构建器
@@ -29,21 +29,21 @@ workflow = StateGraph(AgentState)
 # ==========================================
 
 
-def coder_step_counter(state: AgentState) -> dict:
-    """增加 Coder 工具调用步数计数器"""
-    current_count = state.get("coder_step_count", 0)
+def executor_step_counter(state: AgentState) -> dict:
+    """增加 Executor 工具调用步数计数器"""
+    current_count = state.get("executor_step_count", 0)
     new_count = current_count + 1
-    logger.info(f"[Coder] 第 {new_count} 步工具调用")
-    return {"coder_step_count": new_count}
+    logger.info(f"[Executor] 第 {new_count} 步工具调用")
+    return {"executor_step_count": new_count}
 
 
 workflow.add_node("planner", planner_node)
-workflow.add_node("coder", coder_node)
-workflow.add_node("coder_step_counter", coder_step_counter)
+workflow.add_node("executor", executor_node)
+workflow.add_node("executor_step_counter", executor_step_counter)
 
-# 给 Planner 和 Coder 分别配备独立的工具执行节点
+# 给 Planner 和 Executor 分别配备独立的工具执行节点
 workflow.add_node("planner_tools", ToolNode(planner_tools))
-workflow.add_node("coder_tools", ToolNode(tools))
+workflow.add_node("executor_tools", ToolNode(tools))
 
 workflow.add_node("sandbox", sandbox_node)
 workflow.add_node("reviewer", reviewer_node)
@@ -60,8 +60,8 @@ def route_after_sandbox(state: AgentState):
     注意：repair_cycle_start 的计数已移至 sandbox_node 内部，
     避免路由回调被多次调用导致重复计数。
     """
-    from src.core.documentation import generate_documentation
-    from src.core.config import PROJECT_ROOT
+    from app.core.documentation import generate_documentation
+    from app.core.config import PROJECT_ROOT
     
     error_trace = state.get("error_trace", "")
     retry_count = state.get("retry_count", 0)
@@ -123,14 +123,14 @@ workflow.add_edge(START, "planner")
 workflow.add_conditional_edges("planner", route_after_planner)
 workflow.add_edge("planner_tools", "planner")  # 工具执行完，把结果还给 Planner
 
-# --- Coder 微循环 ---
-workflow.add_conditional_edges("coder", route_after_coder)
-workflow.add_edge("coder_tools", "coder")  # 工具执行完，把结果还给 Coder
-workflow.add_edge("coder_step_counter", "coder_tools")  # 计数器 -> 工具执行
+# --- Executor 微循环 ---
+workflow.add_conditional_edges("executor", route_after_executor)
+workflow.add_edge("executor_tools", "executor")  # 工具执行完，把结果还给 Executor
+workflow.add_edge("executor_step_counter", "executor_tools")  # 计数器 -> 工具执行
 
 # --- 测试与反思回环 ---
 workflow.add_conditional_edges("sandbox", route_after_sandbox)
-workflow.add_edge("reviewer", "coder")  # 报错诊断后，打回给 Coder 继续改
+workflow.add_edge("reviewer", "executor")  # 报错诊断后，打回给 Executor 继续改
 
 
 # ==========================================
@@ -161,7 +161,7 @@ async def main():
         "messages": [("user", user_prompt)],
         "max_retries": 3,
         "retry_count": 0,
-        "max_coder_steps": 15,
+        "max_executor_steps": 15,
     }
 
     # 开始异步流式运行我们的图

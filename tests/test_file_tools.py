@@ -1,5 +1,5 @@
 """
-Tests for src/tools/file_tools.py
+Tests for app/tools/file_tools.py
 
 Covers:
 - Path traversal protection (_get_safe_filepath)
@@ -7,6 +7,7 @@ Covers:
 - edit_file fuzzy matching strategies
 - Backup and rollback lifecycle
 """
+
 
 import os
 import textwrap
@@ -23,13 +24,13 @@ class TestSafeFilepath:
     """Security boundary: never allow escaping the workspace."""
 
     def test_normal_relative_path(self, tmp_workspace):
-        from src.tools.file_tools import _get_safe_filepath
+        from app.tools.file_tools import _get_safe_filepath
         safe = _get_safe_filepath("sub/file.py")
         assert safe.endswith(os.path.join("sub", "file.py"))
         assert safe.startswith(os.path.abspath(str(tmp_workspace)))
 
     def test_dotdot_escape_blocked(self, tmp_workspace):
-        from src.tools.file_tools import _get_safe_filepath
+        from app.tools.file_tools import _get_safe_filepath
         for malicious in [
             "../../etc/passwd",
             "..\\..\\windows\\system32",
@@ -48,14 +49,14 @@ class TestASTOutline:
     """Verify that large files get an outline, not full source."""
 
     def test_small_file_returns_content(self, tmp_workspace):
-        from src.tools.file_tools import read_file
+        from app.tools.file_tools import read_file
         (tmp_workspace / "small.py").write_text("x = 1\n")
         result = read_file.invoke({"filename": "small.py"})
         assert "x = 1" in result
         assert "Structure of" not in result
 
     def test_large_file_returns_outline(self, tmp_workspace):
-        from src.tools.file_tools import read_file
+        from app.tools.file_tools import read_file
         # Build content > 5000 chars with 2 functions
         body = "\n".join(f"    pass  # line {i}" for i in range(200))
         src = f"def foo(a, b):\n{body}\n\ndef bar(x):\n{body}\n"
@@ -69,12 +70,12 @@ class TestASTOutline:
         assert "pass  # line" not in result
 
     def test_nonexistent_file(self, tmp_workspace):
-        from src.tools.file_tools import read_file
+        from app.tools.file_tools import read_file
         result = read_file.invoke({"filename": "missing.py"})
         assert "does not exist" in result
 
     def test_read_function_extraction(self, tmp_workspace):
-        from src.tools.file_tools import read_function
+        from app.tools.file_tools import read_function
         src = textwrap.dedent(
             '''
             def hello(name):
@@ -90,7 +91,7 @@ class TestASTOutline:
         assert "bye" not in result
 
     def test_read_class_extraction(self, tmp_workspace):
-        from src.tools.file_tools import read_class
+        from app.tools.file_tools import read_class
         src = textwrap.dedent(
             """
             class MyClass:
@@ -107,7 +108,7 @@ class TestASTOutline:
         assert "OtherClass" not in result
 
     def test_read_file_range(self, tmp_workspace):
-        from src.tools.file_tools import read_file_range
+        from app.tools.file_tools import read_file_range
         lines = "\n".join(f"line_{i}" for i in range(1, 21))
         (tmp_workspace / "numbered.py").write_text(lines)
         result = read_file_range.invoke({"filename": "numbered.py", "start_line": 5, "end_line": 7})
@@ -126,7 +127,7 @@ class TestEditFile:
     """Three-tier edit: exact -> stripped -> fuzzy."""
 
     def _edit(self, tmp_workspace, filename, search_block, replace_block):
-        from src.tools.file_tools import edit_file
+        from app.tools.file_tools import edit_file
         return edit_file.invoke(
             {"filename": filename, "search_block": search_block, "replace_block": replace_block}
         )
@@ -160,7 +161,7 @@ class TestEditFile:
         assert "修改失败" in result
 
     def test_nonexistent_file(self, tmp_workspace):
-        from src.tools.file_tools import edit_file
+        from app.tools.file_tools import edit_file
         result = edit_file.invoke({"filename": "ghost.py", "search_block": "x", "replace_block": "y"})
         assert "不存在" in result
 
@@ -174,14 +175,14 @@ class TestBackupRollback:
     """Lifecycle: backup -> edit -> rollback."""
 
     def test_backup_creates_file(self, tmp_workspace):
-        from src.tools.file_tools import backup_file
+        from app.tools.file_tools import backup_file
         (tmp_workspace / "bak_me.py").write_text("original\n")
         result = backup_file("bak_me.py")
         assert result is not None
         assert ".backups" in result
 
     def test_rollback_restores(self, tmp_workspace):
-        from src.tools.file_tools import backup_file, rollback_file
+        from app.tools.file_tools import backup_file, rollback_file
         fpath = tmp_workspace / "restore.py"
         fpath.write_text("v1\n")
         backup_file("restore.py")
@@ -192,11 +193,11 @@ class TestBackupRollback:
         assert fpath.read_text() == "v1\n"
 
     def test_no_backup_for_missing_file(self, tmp_workspace):
-        from src.tools.file_tools import backup_file
+        from app.tools.file_tools import backup_file
         assert backup_file("ghost.py") is None
 
     def test_write_file_creates_dirs(self, tmp_workspace):
-        from src.tools.file_tools import write_file
+        from app.tools.file_tools import write_file
         result = write_file.invoke({"filename": "deep/nested/new.py", "content": "x=1\n"})
         assert "Successfully" in result or "created" in result.lower() or "更新" in result
         assert (tmp_workspace / "deep" / "nested" / "new.py").read_text() == "x=1\n"
@@ -209,7 +210,7 @@ class TestBackupRollback:
 
 class TestListDirectory:
     def test_lists_files(self, tmp_workspace):
-        from src.tools.file_tools import list_directory
+        from app.tools.file_tools import list_directory
         (tmp_workspace / "a.py").write_text("")
         (tmp_workspace / "b.txt").write_text("")
         result = list_directory.invoke({"path": "."})
@@ -217,12 +218,12 @@ class TestListDirectory:
         assert "b.txt" in result
 
     def test_hides_backups(self, tmp_workspace):
-        from src.tools.file_tools import list_directory
+        from app.tools.file_tools import list_directory
         (tmp_workspace / ".backups").mkdir(exist_ok=True)
         result = list_directory.invoke({"path": "."})
         assert ".backups" not in result
 
     def test_nonexistent_dir(self, tmp_workspace):
-        from src.tools.file_tools import list_directory
+        from app.tools.file_tools import list_directory
         result = list_directory.invoke({"path": "no_such_dir"})
         assert "不是一个" in result or "not" in result or "Error" in result

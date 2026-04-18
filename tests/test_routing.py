@@ -1,9 +1,9 @@
 """
-Tests for routing logic in src/core/routing.py and run.py::route_after_sandbox.
+Tests for routing logic in app/core/routing.py and run.py::route_after_sandbox.
 
 Covers:
 - route_after_planner: tool_call vs no-tool_call routing
-- route_after_coder: tool_call, max_steps, completion routing
+- route_after_executor: tool_call, max_steps, completion routing
 - route_after_sandbox (from run.py): success, retry, max_retries routing
 """
 
@@ -19,60 +19,60 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 class TestRouteAfterPlanner:
     def test_routes_to_tools_when_tool_calls_present(self):
-        from src.core.routing import route_after_planner
+        from app.core.routing import route_after_planner
         ai = AIMessage(content="")
         ai.tool_calls = [{"name": "read_file", "args": {"filename": "x.py"}}]
         state = {"messages": [ai]}
         assert route_after_planner(state) == "planner_tools"
 
-    def test_routes_to_coder_when_done(self):
-        from src.core.routing import route_after_planner
-        # No tool_calls -> plan is ready, go to coder.
+    def test_routes_to_executor_when_done(self):
+        from app.core.routing import route_after_planner
+        # No tool_calls -> plan is ready, go to executor.
         ai = AIMessage(content="Here is the plan...")
         state = {"messages": [ai]}
-        assert route_after_planner(state) == "coder"
+        assert route_after_planner(state) == "executor"
 
 
 # ---------------------------------------------------------------------------
-# route_after_coder
+# route_after_executor
 # ---------------------------------------------------------------------------
 
 
-class TestRouteAfterCoder:
+class TestRouteAfterExecutor:
     def test_routes_to_counter_when_tool_calls(self):
-        from src.core.routing import route_after_coder
+        from app.core.routing import route_after_executor
         ai = AIMessage(content="")
         ai.tool_calls = [{"name": "read_file", "args": {"filename": "x.py"}}]
-        state = {"messages": [ai], "coder_step_count": 0, "max_coder_steps": 15}
-        assert route_after_coder(state) == "coder_step_counter"
+        state = {"messages": [ai], "executor_step_count": 0, "max_executor_steps": 15}
+        assert route_after_executor(state) == "executor_step_counter"
 
     def test_routes_to_sandbox_when_done(self):
-        from src.core.routing import route_after_coder
+        from app.core.routing import route_after_executor
         ai = AIMessage(content="DONE")  # no tool_calls
-        state = {"messages": [ai], "coder_step_count": 0, "max_coder_steps": 15}
-        assert route_after_coder(state) == "sandbox"
+        state = {"messages": [ai], "executor_step_count": 0, "max_executor_steps": 15}
+        assert route_after_executor(state) == "sandbox"
 
     def test_routes_to_sandbox_at_max_steps(self):
-        from src.core.routing import route_after_coder
+        from app.core.routing import route_after_executor
         ai = AIMessage(content="")
         ai.tool_calls = [{"name": "write_file", "args": {"filename": "x.py"}}]
-        state = {"messages": [ai], "coder_step_count": 15, "max_coder_steps": 15}
-        assert route_after_coder(state) == "sandbox"
+        state = {"messages": [ai], "executor_step_count": 15, "max_executor_steps": 15}
+        assert route_after_executor(state) == "sandbox"
 
-    def test_max_coder_steps_from_env(self, monkeypatch):
-        from src.core.routing import route_after_coder
-        monkeypatch.setenv("MAX_CODER_STEPS", "5")
+    def test_max_executor_steps_from_env(self, monkeypatch):
+        from app.core.routing import route_after_executor
+        monkeypatch.setenv("MAX_EXECUTOR_STEPS", "5")
         ai = AIMessage(content="")
         ai.tool_calls = [{"name": "read", "args": {"filename": "x.py"}}]
-        state = {"messages": [ai], "coder_step_count": 5, "max_coder_steps": 5}
-        assert route_after_coder(state) == "sandbox"
+        state = {"messages": [ai], "executor_step_count": 5, "max_executor_steps": 5}
+        assert route_after_executor(state) == "sandbox"
 
     def test_below_max_goes_to_counter(self):
-        from src.core.routing import route_after_coder
+        from app.core.routing import route_after_executor
         ai = AIMessage(content="")
         ai.tool_calls = [{"name": "edit_file", "args": {"filename": "x.py"}}]
-        state = {"messages": [ai], "coder_step_count": 3, "max_coder_steps": 10}
-        assert route_after_coder(state) == "coder_step_counter"
+        state = {"messages": [ai], "executor_step_count": 3, "max_executor_steps": 10}
+        assert route_after_executor(state) == "executor_step_counter"
 
 
 # ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
-# CodeCraftAI
+# InnovateFlow
 
-**CodeCraftAI** 是一个基于 LangGraph 和 Docker 的多智能体编程框架，由 [xueqiangzhao009-cloud](https://github.com/xueqiangzhao009-cloud) 开发。
+**InnovateFlow** 是一个基于 LangGraph 和 Docker 的多智能体创新协作框架，由 [xueqiangzhao009-cloud](https://github.com/xueqiangzhao009-cloud) 开发。
 
-你只需要描述需求，它就能自动完成规划、编码、测试的完整流程，帮你把想法变成可运行的代码。
+你只需要描述需求，它就能自动完成规划、执行、测试的完整流程，帮你把想法变成可运行的解决方案。
 
 ## 核心特性
 
@@ -10,8 +10,8 @@
 
 | Agent | 职责 |
 |-------|------|
-| **Planner** (架构师) | 理解需求，探索工作区，制定分步开发计划 |
-| **Coder** (工程师) | 精准执行代码修改，作为"代码手术刀" |
+| **Planner** (规划师) | 理解需求，探索工作区，制定分步开发计划 |
+| **Executor** (执行者) | 精准执行任务，作为"执行手术刀" |
 | **Sandbox** (沙盒) | Docker 隔离运行，自动发现测试文件并执行 |
 | **Reviewer** (审查员) | 分析错误栈 + diff，生成诊断报告并打回修复 |
 
@@ -113,7 +113,7 @@ python run.py
 ## 项目结构
 
 ```
-CodeCraftAI/
+InnovateFlow/
 ├── run.py                      # LangGraph 工作流编排 & CLI 入口
 ├── web_ui.py                   # Streamlit Web UI
 ├── api_server.py               # FastAPI 后端 + React 前端服务
@@ -122,7 +122,7 @@ CodeCraftAI/
 ├── src/
 │   ├── agents/
 │   │   ├── Planner.py          # 规划师：需求理解 + 计划生成
-│   │   ├── Coder.py            # 工程师：代码编写 + 文件修改
+│   │   ├── Executor.py         # 执行者：任务执行 + 文件修改
 │   │   ├── Reviewer.py         # 审查员：报错分析 + 诊断报告
 │   │   └── Sandbox.py          # 沙盒：Docker 隔离测试
 │   │
@@ -138,7 +138,7 @@ CodeCraftAI/
 │   │   ├── metrics.py          # 可观测性指标收集器
 │   │   ├── language_support.py # 多语言支持
 │   │   ├── git_integration.py  # Git 集成
-│   │   ├── code_quality.py     # 代码质量分析
+│   │   ├── quality_analysis.py # 质量分析
 │   │   └── documentation.py    # 文档自动生成
 │   │
 │   └── tools/

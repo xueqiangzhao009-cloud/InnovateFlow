@@ -5,8 +5,8 @@ CodeCraftAI Web UI - 增强版 Streamlit 应用
 子页面放在 pages/ 目录自动发现。
 """
 
-from src.core.config import WORKSPACE_DIR
-from src.core.metrics import metrics as metrics_collector
+from app.core.config import WORKSPACE_DIR
+from app.core.metrics import metrics as metrics_collector
 from run import app as graph_app
 import os
 import sys
@@ -22,8 +22,7 @@ if ROOT not in sys.path:
 
 
 st.set_page_config(
-    page_title="nanoCursor 工作台",
-    page_icon="🤖",
+    page_title="InnovateFlow 工作台",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -65,16 +64,16 @@ def _count_workspace_files():
 
 
 with st.sidebar:
-    st.markdown("### 🤖 CodeCraftAI")
-    st.caption("基于 LangGraph + Docker 的多智能体自动编程框架")
+    st.markdown("### InnovateFlow")
+    st.caption("基于 LangGraph + Docker 的多智能体创新协作框架")
     st.divider()
 
-    st.markdown("### 🔗 会话信息")
+    st.markdown("### 会话信息")
     st.code(f"Thread: {st.session_state.thread_id[:12]}...")
-    status_text = "🟢 空闲" if not st.session_state.is_running else "🟡 运行中"
+    status_text = "空闲" if not st.session_state.is_running else "运行中"
     st.caption(status_text)
 
-    if st.button("🧹 清空对话", use_container_width=True):
+    if st.button("清空对话", use_container_width=True):
         st.session_state.chat_messages = []
         st.session_state.execution_log = []
         st.session_state.active_plan = ""
@@ -85,15 +84,15 @@ with st.sidebar:
 
     st.divider()
 
-    st.markdown("### 📊 实时状态")
+    st.markdown("### 实时状态")
     if st.session_state.active_plan:
-        with st.expander("📋 当前计划", expanded=True):
+        with st.expander("当前计划", expanded=True):
             st.caption(st.session_state.active_plan[:300])
     else:
         st.caption("暂无计划")
 
     if st.session_state.active_files_list:
-        with st.expander("📂 目标文件", expanded=True):
+        with st.expander("目标文件", expanded=True):
             for f in st.session_state.active_files_list:
                 st.caption(f"• {f}")
     else:
@@ -105,12 +104,12 @@ with st.sidebar:
         st.caption(f"重试: {retry['count']}/{retry['max']}")
 
     if st.session_state.error_trace:
-        with st.expander("❌ 错误追踪", expanded=True):
+        with st.expander("错误追踪", expanded=True):
             st.code(st.session_state.error_trace[:500], language="text")
 
     st.divider()
 
-    st.markdown("### 📈 指标快照")
+    st.markdown("### 指标快照")
     summary = metrics_collector.dump_summary()
     llm = summary["llm"]
     tools_data = summary["tool_calls"]
@@ -133,8 +132,8 @@ with st.sidebar:
 # ============================================================
 # 主区域
 # ============================================================
-st.title("CodeCraftAI 工作台")
-st.caption("输入你的需求，智能体会自动规划、编码、测试")
+st.title("InnovateFlow 工作台")
+st.caption("输入你的需求，智能体会自动规划、执行、测试")
 
 chat_col, viz_col = st.columns([3, 2])
 
@@ -187,24 +186,24 @@ with chat_col:
                                 exec_log.append(
                                     ("🛠️ Planner Tools", "info", "读取文件/列出目录"))
 
-                            elif node_name == "coder":
+                            elif node_name == "executor":
                                 if "messages" in node_state and node_state["messages"]:
                                     content = node_state["messages"][-1].content
                                     st.caption(
-                                        f"💻 **Coder:** {content[:200]}...")
+                                        f"**Executor:** {content[:200]}...")
                                 exec_log.append(
-                                    ("💻 Coder", "completed", "代码/工具调用"))
+                                    ("Executor", "completed", "任务/工具调用"))
 
-                            elif node_name == "coder_step_counter":
-                                step = node_state.get("coder_step_count", 0)
-                                st.caption(f"🔢 Coder 第 {step} 步工具调用")
+                            elif node_name == "executor_step_counter":
+                                step = node_state.get("executor_step_count", 0)
+                                st.caption(f"Executor 第 {step} 步工具调用")
                                 exec_log.append(
-                                    ("🔢 Coder Step", "info", f"步数: {step}"))
+                                    ("Executor Step", "info", f"步数: {step}"))
 
-                            elif node_name == "coder_tools":
-                                st.write("🛠️ **Coder** 调用文件工具...")
+                            elif node_name == "executor_tools":
+                                st.write("**Executor** 调用文件工具...")
                                 exec_log.append(
-                                    ("🛠️ Coder Tools", "info", "读写文件"))
+                                    ("Executor Tools", "info", "读写文件"))
 
                             elif node_name == "sandbox":
                                 error = node_state.get("error_trace", "")
@@ -232,13 +231,13 @@ with chat_col:
                                 exec_log.append(
                                     ("🧐 Reviewer", "warning", "分析错误并给出修复建议"))
 
-                    status.update(label="✅ 工作流执行闭环完成！",
+                    status.update(label="工作流执行闭环完成！",
                                   state="complete", expanded=False)
                     st.session_state.execution_log = exec_log
 
                 except Exception as e:
                     status.update(
-                        label=f"❌ 执行出错: {e}", state="error", expanded=False)
+                        label=f"执行出错: {e}", state="error", expanded=False)
                     st.error(str(e))
                     st.session_state.execution_log = exec_log
                 finally:
@@ -263,9 +262,7 @@ with viz_col:
 
     if st.session_state.execution_log:
         for node, status, detail in st.session_state.execution_log:
-            icon = {"completed": "✅", "failed": "❌",
-                    "warning": "⚠️", "info": "ℹ️"}.get(status, "ℹ️")
-            st.markdown(f"{icon} **{node}** — {detail}")
+            st.markdown(f"**{node}** — {detail}")
     else:
         st.caption("暂无执行记录")
 
@@ -287,21 +284,21 @@ flowchart TD
     START((开始)) --> planner[Planner]
     planner -- 工具调用 --> planner_tools[Planner Tools]
     planner_tools --> planner
-    planner -- 无调用 --> coder[Coder]
-    coder -- 工具调用 --> step_counter[Step Counter]
-    step_counter --> coder_tools[Coder Tools]
-    coder_tools --> coder
-    coder -- 无调用 --> sandbox[Sandbox]
+    planner -- 无调用 --> executor[Executor]
+    executor -- 工具调用 --> step_counter[Step Counter]
+    step_counter --> executor_tools[Executor Tools]
+    executor_tools --> executor
+    executor -- 无调用 --> sandbox[Sandbox]
     sandbox -- 通过 --> END_NODE(结束)
     sandbox -- 失败 --> reviewer[Reviewer]
-    reviewer --> coder
+    reviewer --> executor
     sandbox -- 超限 --> END_NODE
 
     style planner fill:""" + clr("planner") + """,stroke:#333,stroke-width:2px
     style planner_tools fill:""" + clr("planner_tools") + """,stroke:#333,stroke-width:2px
-    style coder fill:""" + clr("coder") + """,stroke:#333,stroke-width:2px
+    style executor fill:""" + clr("executor") + """,stroke:#333,stroke-width:2px
     style step_counter fill:""" + clr("step_counter") + """,stroke:#333,stroke-width:2px
-    style coder_tools fill:""" + clr("coder_tools") + """,stroke:#333,stroke-width:2px
+    style executor_tools fill:""" + clr("executor_tools") + """,stroke:#333,stroke-width:2px
     style sandbox fill:""" + clr("sandbox") + """,stroke:#333,stroke-width:2px
     style reviewer fill:""" + clr("reviewer") + """,stroke:#333,stroke-width:2px
     style END_NODE fill:#e5e7eb,stroke:#333

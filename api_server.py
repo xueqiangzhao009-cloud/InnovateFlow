@@ -35,20 +35,20 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 # 加载环境变量
-load_dotenv(os.path.join(ROOT, "src", "core", ".env"))
+load_dotenv(os.path.join(ROOT, "app", "core", ".env"))
 
 # 导入 LangGraph 应用、指标收集器、配置等
 from run import app as graph_app
-from src.core.metrics import metrics as metrics_collector
-from src.core.config import WORKSPACE_DIR
+from app.core.metrics import metrics as metrics_collector
+from app.core.config import WORKSPACE_DIR
 
 # ============================================================
 # 创建 FastAPI 应用
 # ============================================================
 
 app = FastAPI(
-    title="nanoCursor API",
-    description="nanoCursor 智能体框架的后端 API 服务",
+    title="InnovateFlow API",
+    description="InnovateFlow 智能体框架的后端 API 服务",
     version="2.0.0",
 )
 
@@ -72,25 +72,25 @@ active_runs: Dict[str, Dict[str, Any]] = {}
 runs_lock = threading.Lock()
 
 
-def _run_workflow(thread_id: str, initial_messages: list, max_retries: int = 3, max_coder_steps: int = 15):
+def _run_workflow(thread_id: str, initial_messages: list, max_retries: int = 3, max_executor_steps: int = 15):
     """
     在后台线程中运行 LangGraph 工作流。
 
-    由于图中的 coder_node 和 reviewer_node 是 async def，需要使用 asyncio.run()
+    由于图中的 executor_node 和 reviewer_node 是 async def，需要使用 asyncio.run()
     在独立线程的事件循环中与 astream() 配合运行。
 
     参数:
         thread_id: 会话的唯一标识符
         initial_messages: 用户输入的对话消息列表
         max_retries: 沙盒测试最大重试次数
-        max_coder_steps: Coder 节点最大工具调用步数
+        max_executor_steps: Executor 节点最大工具调用步数
     """
     asyncio.run(
-        _run_workflow_async(thread_id, initial_messages, max_retries, max_coder_steps)
+        _run_workflow_async(thread_id, initial_messages, max_retries, max_executor_steps)
     )
 
 
-async def _run_workflow_async(thread_id: str, initial_messages: list, max_retries: int, max_coder_steps: int):
+async def _run_workflow_async(thread_id: str, initial_messages: list, max_retries: int, max_executor_steps: int):
     """_run_workflow 的异步内部实现。"""
     run_info = active_runs.get(thread_id)
     if not run_info:
@@ -104,7 +104,7 @@ async def _run_workflow_async(thread_id: str, initial_messages: list, max_retrie
         "messages": [HumanMessage(content=msg) for msg in initial_messages],
         "max_retries": max_retries,
         "retry_count": 0,
-        "max_coder_steps": max_coder_steps,
+        "max_executor_steps": max_executor_steps,
     }
 
     try:
@@ -147,8 +147,8 @@ def _extract_node_event(node_name: str, node_state: dict) -> dict:
         # Planner 节点返回当前计划
         data["current_plan"] = node_state.get("current_plan", "")
 
-    elif node_name == "coder":
-        # Coder 节点返回最新消息内容
+    elif node_name == "executor":
+        # Executor 节点返回最新消息内容
         if "messages" in node_state and node_state["messages"]:
             last_msg = node_state["messages"][-1]
             content = last_msg.content
@@ -164,9 +164,9 @@ def _extract_node_event(node_name: str, node_state: dict) -> dict:
             if content and isinstance(content, str):
                 data["content"] = content
 
-    elif node_name == "coder_step_counter":
-        # Coder 步数计数器
-        data["coder_step_count"] = node_state.get("coder_step_count", 0)
+    elif node_name == "executor_step_counter":
+        # Executor 步数计数器
+        data["executor_step_count"] = node_state.get("executor_step_count", 0)
 
     elif node_name == "sandbox":
         # 沙盒节点返回错误跟踪和重试信息
@@ -577,7 +577,7 @@ async def get_config():
         "sandbox_image": os.getenv("SANDBOX_IMAGE", "python:3.10-slim"),
         "sandbox_mem_limit": os.getenv("SANDBOX_MEM_LIMIT", "256m"),
         "sandbox_timeout": int(os.getenv("SANDBOX_TIMEOUT_SECONDS", "60")),
-        "max_coder_steps": int(os.getenv("MAX_CODER_STEPS", "15")),
+        "max_executor_steps": int(os.getenv("MAX_EXECUTOR_STEPS", "15")),
         "max_planner_steps": int(os.getenv("MAX_PLANNER_STEPS", "10")),
         "context_max_tokens": int(os.getenv("CONTEXT_MAX_TOKENS", "8000")),
     }
@@ -854,7 +854,7 @@ if __name__ == "__main__":
     import uvicorn
 
     print("=" * 60)
-    print("  nanoCursor API Server")
+    print("  InnovateFlow API Server")
     print("=" * 60)
     print(f"  工作区: {WORKSPACE_DIR}")
     print(f"  开发模式: 运行 'cd frontend && npm run dev'")

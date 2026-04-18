@@ -28,10 +28,13 @@
 #### 类
 - `ContextSlot`
 - `Test功能名`
+- `Test功能名`
 
 #### 函数
 - `get_encoding()`
 - `__init__()`
+- `test_具体用例()`
+- `test_具体用例()`
 - `test_具体用例()`
 - `test_具体用例()`
 
@@ -107,7 +110,7 @@
 
 #### 函数
 - `route_after_planner()`
-- `route_after_coder()`
+- `route_after_executor()`
 
 ### state
 

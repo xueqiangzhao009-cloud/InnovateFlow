@@ -1,8 +1,8 @@
-# DevForgeAI 项目指南
+# InnovateFlow 项目指南
 
 ## 项目简介
 
-DevForgeAI 是一个基于 LangGraph 和 Docker 的多智能体编程框架。用户只需描述需求，系统会自动完成规划、编码、测试的完整流程。
+InnovateFlow 是一个基于 LangGraph 和 Docker 的多智能体创新协作框架。用户只需描述需求，系统会自动完成规划、执行、测试的完整流程，帮你把想法变成可运行的解决方案。
 
 ## 技术栈
 
@@ -40,34 +40,36 @@ npm run dev  # 启动 Vite 开发服务器，端口 3000
 ## 项目结构
 
 ```
-DevForgeAI/
-├── run.py                      # LangGraph 工作流入口
+InnovateFlow/
+├── run.py                      # LangGraph 工作流编排 & CLI 入口
 ├── web_ui.py                   # Streamlit Web UI
 ├── api_server.py               # FastAPI 后端 + React 前端服务
 ├── requirements.txt            # Python 依赖
 │
 ├── src/
 │   ├── agents/
-│   │   ├── Planner.py          # 规划师：理解需求，制定计划
-│   │   ├── Coder.py            # 工程师：编写和修改代码
-│   │   ├── Reviewer.py         # 审查员：分析错误，给出修复建议
+│   │   ├── Planner.py          # 规划师：需求理解 + 计划生成
+│   │   ├── Executor.py         # 执行者：任务执行 + 文件修改
+│   │   ├── Reviewer.py         # 审查员：报错分析 + 诊断报告
 │   │   └── Sandbox.py          # 沙盒：Docker 隔离测试
 │   │
 │   ├── core/
-│   │   ├── config.py           # 全局配置
-│   │   ├── context_manager.py  # 上下文管理（三层记忆策略）
-│   │   ├── state.py            # 状态定义
-│   │   ├── llm_engine.py       # LLM 初始化和调用
-│   │   ├── logger.py           # 日志系统
-│   │   ├── repo_map.py         # AST 代码解析
-│   │   ├── routing.py          # 工作流路由逻辑
-│   │   ├── recovery.py         # 错误恢复和快照
-│   │   ├── metrics.py          # 指标收集
+│   │   ├── config.py           # 全局配置 & 路径解析
+│   │   ├── context_manager.py  # 分层上下文管理 v2.0
+│   │   ├── state.py            # AgentState 定义 + InMemorySaver
+│   │   ├── llm_engine.py       # 多提供商 LLM 初始化 + 异步重试
+│   │   ├── logger.py           # 结构化日志
+│   │   ├── repo_map.py         # AST 仓库地图
+│   │   ├── routing.py          # 路由决策逻辑
+│   │   ├── recovery.py         # 熔断快照 & 错误恢复
+│   │   ├── metrics.py          # 可观测性指标收集器
 │   │   ├── language_support.py # 多语言支持
-│   │   └── git_integration.py  # Git 集成
+│   │   ├── git_integration.py  # Git 集成
+│   │   ├── quality_analysis.py # 质量分析
+│   │   └── documentation.py    # 文档自动生成
 │   │
 │   └── tools/
-│       └── file_tools.py       # 文件操作工具
+│       └── file_tools.py       # 8 个文件工具 (read/edit/write/...)
 │
 ├── frontend/                   # React 前端
 │   └── src/
@@ -80,6 +82,7 @@ DevForgeAI/
 │           └── AppContext.tsx  # 全局状态管理
 │
 ├── tests/                      # 单元测试
+├── docs/                       # 自动生成的文档
 └── workspace/                  # Agent 工作区
 ```
 
@@ -90,7 +93,7 @@ DevForgeAI/
 | Agent | 职责 |
 |-------|------|
 | Planner | 理解需求，探索工作区，制定开发计划 |
-| Coder | 执行代码修改，读写文件 |
+| Executor | 执行任务，读写文件，修改代码 |
 | Sandbox | Docker 隔离测试，自动发现测试文件 |
 | Reviewer | 分析测试失败原因，给出修复建议 |
 
@@ -129,7 +132,7 @@ DEEPSEEK_BASE_URL=https://api.deepseek.com
 ## 工作流程
 
 ```
-用户需求 → Planner 规划 → Coder 编码 → Sandbox 测试
+用户需求 → Planner 规划 → Executor 执行 → Sandbox 测试
                                     ↑           ↓
                                     └─ Reviewer 审查（失败时）
 ```

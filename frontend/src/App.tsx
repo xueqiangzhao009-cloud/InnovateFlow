@@ -47,8 +47,8 @@ function Sidebar() {
     <aside className="sidebar">
       {/* 应用头部 */}
       <div className="sidebar-header">
-        <h1>nanoCursor</h1>
-        <p>基于 LangGraph + Docker 的多智能体自动编程框架</p>
+        <h1>InnovateFlow</h1>
+        <p>基于 LangGraph + Docker 的多智能体创新协作框架</p>
       </div>
 
       {/* 会话信息 */}

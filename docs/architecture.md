@@ -9,14 +9,14 @@ flowchart TD
     START((开始)) --> planner[Planner]
     planner -- 工具调用 --> planner_tools[Planner Tools]
     planner_tools --> planner
-    planner -- 无调用 --> coder[Coder]
-    coder -- 工具调用 --> step_counter[Step Counter]
-    step_counter --> coder_tools[Coder Tools]
-    coder_tools --> coder
-    coder -- 无调用 --> sandbox[Sandbox]
+    planner -- 无调用 --> executor[Executor]
+    executor -- 工具调用 --> step_counter[Step Counter]
+    step_counter --> executor_tools[Executor Tools]
+    executor_tools --> executor
+    executor -- 无调用 --> sandbox[Sandbox]
     sandbox -- 通过 --> END_NODE(结束)
     sandbox -- 失败 --> reviewer[Reviewer]
-    reviewer --> coder
+    reviewer --> executor
     sandbox -- 超限 --> END_NODE
 ```
 
@@ -25,12 +25,12 @@ flowchart TD
 | 路由 | 条件 | 下一节点 |
 |------|------|----------|
 | `route_after_planner` | 有 tool_calls | `planner_tools` |
-| `route_after_planner` | 无 tool_calls | `coder` |
-| `route_after_planner` | tool_calls ≥ MAX_PLANNER_STEPS | `coder` (强制结束探索) |
-| `route_after_coder` | 有 tool_calls | `coder_step_counter` → `coder_tools` |
-| `route_after_coder` | 无 tool_calls 或达到步数上限 | `sandbox` |
+| `route_after_planner` | 无 tool_calls | `executor` |
+| `route_after_planner` | tool_calls ≥ MAX_PLANNER_STEPS | `executor` (强制结束探索) |
+| `route_after_executor` | 有 tool_calls | `executor_step_counter` → `executor_tools` |
+| `route_after_executor` | 无 tool_calls 或达到步数上限 | `sandbox` |
 | `route_after_sandbox` | 无 error_trace | `END` |
-| `route_after_sandbox` | 有 error 且 retry < max | `reviewer` → `coder` |
+| `route_after_sandbox` | 有 error 且 retry < max | `reviewer` → `executor` |
 | `route_after_sandbox` | retry ≥ max | 保存快照 → `END` |
 
 ## 核心模块

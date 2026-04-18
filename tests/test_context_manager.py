@@ -1,5 +1,5 @@
 """
-Tests for src/core/context_manager.py
+Tests for app/core/context_manager.py
 
 Covers:
 - Token estimation (estimate_token_count, estimate_messages_tokens)
@@ -9,10 +9,11 @@ Covers:
 - extract_original_request, extract_file_signatures
 """
 
+
 import pytest
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage, SystemMessage
 
-from src.core.context_manager import (
+from app.core.context_manager import (
     estimate_token_count,
     estimate_messages_tokens,
     calculate_dynamic_window,
