@@ -13,7 +13,17 @@
 
 ## 核心模块 API
 
-### context_handler
+### code_quality
+
+#### 类
+- `class`
+
+#### 函数
+- `__init__()`
+
+### config
+
+### context_manager
 
 #### 类
 - `ContextSlot`
@@ -28,7 +38,7 @@
 - `test_具体用例()`
 - `test_具体用例()`
 
-### doc_generator
+### documentation
 
 #### 类
 - `class`
@@ -36,18 +46,7 @@
 #### 函数
 - `__init__()`
 
-### fault_recovery
-
-#### 函数
-- `_copy_python_files()`
-
-### flow_control
-
-#### 函数
-- `route_after_planner()`
-- `route_after_executor()`
-
-### git_handler
+### git_integration
 
 #### 类
 - `class`
@@ -56,7 +55,7 @@
 #### 函数
 - `__init__()`
 
-### lang_support
+### language_support
 
 #### 类
 - `Language`
@@ -66,7 +65,7 @@
 #### 函数
 - `__init__()`
 
-### llm_handler
+### llm_engine
 
 #### 类
 - `LLMWithRetry`
@@ -81,9 +80,9 @@
 - `_get()`
 - `__getattr__()`
 
-### logging
+### logger
 
-### metrics_collector
+### metrics
 
 #### 类
 - `MetricsCollector`
@@ -97,22 +96,23 @@
 - `record_repair_cycle_outcome()`
 - `flush_to_file()`
 
-### quality_analyzer
-
-#### 类
-- `class`
+### recovery
 
 #### 函数
-- `__init__()`
+- `_copy_python_files()`
 
-### repo_analyzer
+### repo_map
 
 #### 函数
 - `generate_repo_map()`
 
-### settings
+### routing
 
-### state_manager
+#### 函数
+- `route_after_planner()`
+- `route_after_executor()`
+
+### state
 
 #### 类
 - `MemorySummary`

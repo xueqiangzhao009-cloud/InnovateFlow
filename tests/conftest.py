@@ -14,12 +14,12 @@ if REPO_ROOT not in sys.path:
 
 def _patch_file_tools_workspace(workspace_str, monkeypatch):
     """Patch both config and file_tools module-level WORKSPACE_DIR refs."""
-    import app.core.config
-    monkeypatch.setattr(app.core.config, "WORKSPACE_DIR", workspace_str, raising=False)
+    import app.core.settings
+    monkeypatch.setattr(app.core.settings, "WORKSPACE_DIR", workspace_str, raising=False)
 
-    import app.tools.file_tools
-    monkeypatch.setattr(app.tools.file_tools, "WORKSPACE_DIR", workspace_str, raising=False)
-    monkeypatch.setattr(app.tools.file_tools, "BACKUP_DIR", os.path.join(workspace_str, ".backups"), raising=False)
+    import app.tools.file_operations
+    monkeypatch.setattr(app.tools.file_operations, "WORKSPACE_DIR", workspace_str, raising=False)
+    monkeypatch.setattr(app.tools.file_operations, "BACKUP_DIR", os.path.join(workspace_str, ".backups"), raising=False)
     _bk = os.path.join(workspace_str, ".backups")
     os.makedirs(_bk, exist_ok=True)
 

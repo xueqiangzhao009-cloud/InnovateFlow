@@ -2,22 +2,22 @@
 InnovateFlow 核心模块
 """
 
-from .config import *
-from .context_manager import *
-from .state import *
-from .llm_engine import *
-from .logger import *
-from .repo_map import *
-from .routing import *
-from .recovery import *
-from .metrics import *
-from .language_support import *
-from .git_integration import *
-from .code_quality import *
-from .documentation import *
+from .settings import *
+from .context_handler import *
+from .state_manager import *
+from .llm_handler import *
+from .logging import *
+from .repo_analyzer import *
+from .flow_control import *
+from .fault_recovery import *
+from .metrics_collector import *
+from .lang_support import *
+from .git_handler import *
+from .quality_analyzer import *
+from .doc_generator import *
 
 __all__ = [
-    # config
+    # settings
     'PROJECT_ROOT',
     'WORKSPACE_DIR',
     'SANDBOX_IMAGE',
@@ -29,7 +29,7 @@ __all__ = [
     'MAX_EXECUTOR_STEPS',
     'MAX_PLANNER_STEPS',
     
-    # context_manager
+    # context_handler
     'estimate_token_count',
     'estimate_messages_tokens',
     'extract_original_request',
@@ -46,31 +46,31 @@ __all__ = [
     'build_reviewer_context',
     'update_memory_summary',
     
-    # state
+    # state_manager
     'AgentState',
     'checkpointer',
     
-    # llm_engine
+    # llm_handler
     'get_llm',
     'get_chat_model',
     
-    # logger
+    # logging
     'setup_logger',
     
-    # repo_map
+    # repo_analyzer
     'build_repo_map',
     
-    # routing
+    # flow_control
     'route_after_planner',
     'route_after_executor',
     
-    # recovery
+    # fault_recovery
     'create_workspace_snapshot',
     
-    # metrics
+    # metrics_collector
     'metrics',
     
-    # language_support
+    # lang_support
     'Language',
     'LanguageConfig',
     'LANGUAGE_CONFIGS',
@@ -82,7 +82,7 @@ __all__ = [
     'ASTParser',
     'create_ast_parser',
     
-    # git_integration
+    # git_handler
     'GitCommit',
     'GitDiff',
     'GitRepository',
@@ -91,13 +91,13 @@ __all__ = [
     'auto_commit',
     'get_change_summary',
     
-    # code_quality
+    # quality_analyzer
     'CodeQualityIssue',
     'CodeQualityAnalyzer',
     'analyze_code_quality',
     'generate_code_quality_report',
     
-    # documentation
+    # doc_generator
     'DocComment',
     'DocumentationGenerator',
     'generate_documentation',
