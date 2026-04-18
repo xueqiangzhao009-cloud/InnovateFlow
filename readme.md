@@ -6,7 +6,7 @@
 
 ## 核心特性
 
-### 🤖 四 Agent 协作闭环
+### 四 Agent 协作闭环
 
 | Agent | 职责 |
 |-------|------|
@@ -15,7 +15,7 @@
 | **Sandbox** (沙盒) | Docker 隔离运行，自动发现测试文件并执行 |
 | **Reviewer** (审查员) | 分析错误栈 + diff，生成诊断报告并打回修复 |
 
-### 🌍 多语言支持
+### 多语言支持
 
 支持 10 种常用语言，自动识别文件类型：
 
@@ -32,14 +32,14 @@
 | PHP | `.php` | phpunit |
 | Ruby | `.rb` | rspec, minitest |
 
-### 🔀 Git 集成
+### Git 集成
 
 - 自动创建功能分支
 - 智能 commit message 生成
 - 变更 diff 可视化
 - 版本回滚支持
 
-### 🧠 上下文管理 — 三层记忆策略
+### 上下文管理 — 三层记忆策略
 
 | 层级 | 内容 | 策略 |
 |------|------|------|
@@ -47,20 +47,20 @@
 | 工作记忆 | 最近 N 轮对话 | 滑动窗口，动态调整 |
 | 参考记忆 | 历史对话结构摘要 | LLM 智能压缩，Fallback 基于规则 |
 
-### 🔒 Docker 隔离测试
+### Docker 隔离测试
 
 - 无网 + 限存的临时容器 (`network_disabled=True`)
 - 自动发现 `test_*.py` / `*_test.py`，优先 pytest 运行
 - `requirements.txt` 自动 pip install
 - 超时熔断 + `auto_remove` 防资源泄漏
 
-### 📊 可观测性
+### 可观测性
 
 - 记录每次 LLM 调用的 Token 消耗和响应时间
 - 测试失败时自动保存工作区快照
 - 每个 Agent 都有独立的日志，方便排查问题
 
-### ✨ 智能功能
+### 智能功能
 
 - **代码质量分析**：静态代码分析，检测潜在问题
 - **文档自动生成**：自动生成项目文档和 API 文档
@@ -77,14 +77,14 @@
 ### 安装
 
 ```bash
-git clone https://github.com/xueqiangzhao009-cloud/CodeCraftAI.git
-cd CodeCraftAI
+git clone https://github.com/xueqiangzhao009-cloud/InnovateFlow.git
+cd InnovateFlow
 pip install -r requirements.txt
 ```
 
 ### 配置
 
-在 `src/core/` 下创建 `.env` 文件（参考 `.env.example`）：
+在 `app/core/` 下创建 `.env` 文件（参考 `.env.example`）：
 
 ```bash
 # Ollama 本地模型
@@ -119,7 +119,7 @@ InnovateFlow/
 ├── api_server.py               # FastAPI 后端 + React 前端服务
 ├── requirements.txt            # Python 依赖
 │
-├── src/
+├── app/
 │   ├── agents/
 │   │   ├── Planner.py          # 规划师：需求理解 + 计划生成
 │   │   ├── Executor.py         # 执行者：任务执行 + 文件修改
@@ -138,7 +138,7 @@ InnovateFlow/
 │   │   ├── metrics.py          # 可观测性指标收集器
 │   │   ├── language_support.py # 多语言支持
 │   │   ├── git_integration.py  # Git 集成
-│   │   ├── quality_analysis.py # 质量分析
+│   │   ├── code_quality.py     # 代码质量分析
 │   │   └── documentation.py    # 文档自动生成
 │   │
 │   └── tools/
